@@ -2,12 +2,16 @@ from distanceAlgorithms.minkowski import minkowskiDistance
 
 
 class Distance:
-    def calculate_distance(self, pointOne, pointTwo, distanceFunction, p=1):
-        if distanceFunction == 'manhattan':
+    def __init__(self, distanceFunction, **otherParameters):
+        self.distanceFunction = distanceFunction
+        self.otherParameters = otherParameters
+
+    def calculate_distance(self, pointOne, pointTwo):
+        if self.distanceFunction == 'manhattan':
             minkowskiDistance(pointOne, pointTwo, 1)
-        elif distanceFunction == 'euclidean':
+        elif self.distanceFunction == 'euclidean':
             minkowskiDistance(pointOne, pointTwo, 2)
-        elif distanceFunction == 'minkowski':
-            minkowskiDistance(pointOne, pointTwo, p)
+        elif self.distanceFunction == 'minkowski':
+            minkowskiDistance(pointOne, pointTwo, self.otherParameters)
         else:
             raise Exception('Distance function not supported')

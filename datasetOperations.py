@@ -1,10 +1,11 @@
 import pandas as pd
 import numpy as np
+import csv
 
 class Dataset:
     def __init__(self, data):
         if isinstance(data, str):
-            self.data = pd.read_csv(data)
+            self.data = csv.reader(open(data, 'r'))
         else:
             self.data = data
 
