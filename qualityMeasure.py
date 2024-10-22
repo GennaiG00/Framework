@@ -1,14 +1,23 @@
-from sklearn.metrics import homogeneity_score, completeness_score, v_measure_score
+import clusteringAlgorithms.qualityMeasure as qmc
+import dimentionalityReductions.qualityMeasure as qmdr
+from sklearn.metrics import pairwise_distances
+import numpy as np
 
-class qualityMeasure:
-    def __init__(self, typeOfMeasure, x, y):
-        self.typeOfMeasure = typeOfMeasure
-        self.xTrue = x
-        self.yPred = y
+def measureClusteringTecnique(nameCt, data):
+    if nameCt == 'clustering':
+        processed_labels = np.where(data == 'noise', -1, data)
+        data = processed_labels.astype(int)
+        labels = data[:, 2]
+        silhouette = qmc.evaluate_clustering(data, labels)
+        dbi = qmc.evaluate_clustering_dbi(data, labels)
+        return silhouette, dbi
 
-    def measure(self):
-        if self.typeOfMeasure == 'clustering':
-            homogeneity = homogeneity_score(self.xTrue, self.yPred)
-            completeness = completeness_score(self.xTrue, self.yPred)
-            v_measure = v_measure_score(self.xTrue, self.yPred)
-            return homogeneity, completeness, v_measure
+def measureDimensionalityReduction(nameDr, *hyperparameters):
+    if nameDr == 'pca':
+        explained_variance = qmdr.evaluate_dimensionality_reduction(hyperparameters[0])
+        return explained_variance
+    elif nameDr == 'tsne':
+        original_distances = pairwise_distances(hyperparameters[0])
+        reduced_distances = pairwise_distances(hyperparameters[1])
+        return np.corrcoef(original_distances.ravel(), reduced_distances.ravel())[0, 1]
+

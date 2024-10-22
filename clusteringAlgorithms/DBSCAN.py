@@ -1,12 +1,17 @@
-import tqdm
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
 import distance
 
 class DBSCAN:
     def __init__(self, data, distanceMeasure, e, minPts):
-        self.data = data
+        self.dist = distance.Distance(distanceMeasure)
         self.distanceMeasure = distanceMeasure
         self.e = e
         self.minPts = minPts
+        self.data = data
+        self.data["labels"] = "undefined"
+        print("DBSCAN object created")
 
     def rangeQuery(self, pointIndex):
         neighbors = []
@@ -14,13 +19,14 @@ class DBSCAN:
         for i, row in enumerate(self.data):
             if i != pointIndex:
                 neighborPoint = row[:-1]
-                dTmp = distance.distance(point, neighborPoint, self.distanceMeasure)
+                dTmp = self.dist.calculate_distance(point, neighborPoint)
                 if dTmp <= self.e:
                     neighbors.append(i)
         return neighbors
 
     def dbscan(self):
         label = 0
+        self.data = np.array(self.data)
         for pointIndex in tqdm(range(len(self.data)), desc="DBSCAN Progress"):
             if self.data[pointIndex][-1] == "undefined":
                 neighbors = self.rangeQuery(pointIndex)

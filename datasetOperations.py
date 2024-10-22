@@ -1,13 +1,34 @@
 import pandas as pd
 import numpy as np
 import csv
+from scipy.io import arff
+from sklearn.preprocessing import LabelEncoder
 
 class Dataset:
-    def __init__(self, data):
-        if isinstance(data, str):
-            self.data = csv.reader(open(data, 'r'))
+    def __init__(self, path):
+        self.path = path
+        if path.endswith('.csv'):
+            self._load_csv(path)
+        elif path.endswith('.arff'):
+            self._load_arff(path)
+        elif path.endswith('.txt'):
+            self._load_txt(path)
         else:
-            self.data = data
+            raise ValueError("Unsupported file format. Please provide a .csv, .arff, or .txt file.")
+
+    def _load_csv(self, path):
+        self.data = pd.read_csv(path)
+
+    def _load_arff(self, path):
+        data, meta = arff.loadarff(path)
+        # Convert to a pandas DataFrame for easier manipulation
+        self.data = pd.DataFrame(data)
+
+    def _load_txt(self, path):
+        try:
+            self.data = pd.read_csv(path, delimiter=';', encoding='utf-8')
+        except:
+            raise ValueError("Error reading .txt file. Ensure the file is properly formatted.")
 
     def get_points(self):
         if isinstance(self.data, pd.DataFrame):
@@ -31,3 +52,45 @@ class Dataset:
                 raise ValueError("Data is not properly structured (list of lists expected)")
         else:
             raise ValueError("Unsupported data format")
+
+    # New method to print the head of the dataset
+    def print_head(self, n=5):
+        if isinstance(self.data, pd.DataFrame):
+            print(self.data.head(n))
+        elif isinstance(self.data, list):
+            # For list data, print the first `n` rows
+            for row in self.data[:n]:
+                print(row)
+        else:
+            raise ValueError("Unsupported data format for printing head")
+
+    def replace_missing_values(self, replacement=np.nan):
+        """
+        Replaces all occurrences of '?' in the dataset with the provided replacement value (np.nan).
+        Then drops rows with any missing values.
+        """
+        # Replace '?' with np.nan
+        self.data = self.data.replace('?', replacement)
+
+        # Drop rows that have any missing (NaN) values
+        self.data = self.data.dropna()
+
+        return self
+
+    def select_columns(self, columns):
+        """
+        Select specific columns from the dataset.
+        """
+        if not all(col in self.data.columns for col in columns):
+            raise ValueError("One or more specified columns do not exist in the dataset.")
+        return self.data[columns]
+
+    def encode_columns(self, df):
+        """
+        Encode categorical columns in the dataframe.
+        """
+        df = df.copy()  # Create a copy of the DataFrame
+        le = LabelEncoder()
+        for column in df.select_dtypes(include=['object']).columns:
+            df[column] = le.fit_transform(df[column])
+        return df
