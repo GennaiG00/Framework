@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
 import csv
+
+from numpy.distutils.conv_template import header
 from scipy.io import arff
+import scipy.io as sio
 from sklearn.preprocessing import LabelEncoder
 
 class Dataset:
@@ -13,6 +16,10 @@ class Dataset:
             self._load_arff(path)
         elif path.endswith('.txt'):
             self._load_txt(path)
+        elif path.endswith('.mat'):
+            self._load_mat_(path)
+        elif path.endswith('.names'):
+            self._load_names(path)
         else:
             raise ValueError("Unsupported file format. Please provide a .csv, .arff, or .txt file.")
 
@@ -26,9 +33,21 @@ class Dataset:
 
     def _load_txt(self, path):
         try:
-            self.data = pd.read_csv(path, delimiter=';', encoding='utf-8')
+            self.data = pd.read_csv(path, delimiter=',', encoding='utf-8', header=None)
         except:
             raise ValueError("Error reading .txt file. Ensure the file is properly formatted.")
+
+    def _load_mat_(self, path):
+        try:
+            self.data = sio.loadmat(path)
+        except:
+            raise ValueError("Error reading .mat file. Ensure the file is properly formatted.")
+
+    def _load_names(self, path):
+        try:
+            self.data = pd.read_csv(path, delimiter=';', encoding='utf-8')
+        except:
+            raise ValueError("Error reading .names file. Ensure the file is properly formatted.")
 
     def get_points(self):
         if isinstance(self.data, pd.DataFrame):
@@ -64,16 +83,13 @@ class Dataset:
         else:
             raise ValueError("Unsupported data format for printing head")
 
-    def replace_missing_values(self, replacement=np.nan):
+    def replace_missing_values(self, replacement=1):
         """
         Replaces all occurrences of '?' in the dataset with the provided replacement value (np.nan).
         Then drops rows with any missing values.
         """
         # Replace '?' with np.nan
         self.data = self.data.replace('?', replacement)
-
-        # Drop rows that have any missing (NaN) values
-        self.data = self.data.dropna()
 
         return self
 
