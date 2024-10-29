@@ -14,8 +14,10 @@ class ClusteringAlgorithm:
         if self.algorithmName == "dbscan" or self.algorithmName == "DBSCAN":
             e = self.hyperparameters[0]
             minPts = self.hyperparameters[1]
-            result = DBSCAN.DBSCAN(pd.DataFrame(self.data), self.distance_measure, e = e, minPts = minPts).dbscan()
-            return result
+            result = pd.DataFrame(DBSCAN.DBSCAN(pd.DataFrame(self.data), self.distance_measure, e=e, minPts=minPts).dbscan())
+            data = result.iloc[:, :-1]
+            labels = result.iloc[:, -1]
+            return data, labels
         elif self.algorithmName == "kmeans" or self.algorithmName == "KMeans":
             n_clusters = self.hyperparameters[0]
             result = KMeans(n_clusters=n_clusters).fit(self.data)

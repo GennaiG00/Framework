@@ -1,8 +1,5 @@
 import pandas as pd
 import numpy as np
-import csv
-
-from numpy.distutils.conv_template import header
 from scipy.io import arff
 import scipy.io as sio
 from sklearn.preprocessing import LabelEncoder
@@ -28,7 +25,6 @@ class Dataset:
 
     def _load_arff(self, path):
         data, meta = arff.loadarff(path)
-        # Convert to a pandas DataFrame for easier manipulation
         self.data = pd.DataFrame(data)
 
     def _load_txt(self, path):
