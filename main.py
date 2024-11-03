@@ -37,12 +37,10 @@ def plot_dimentionaly_reduction_matrix(reduction_techniques, dataset_names):
         axes[i, 2].scatter(reduction_techniques[i][2].iloc[:, 0], reduction_techniques[i][1].iloc[:, 2], c=reduction_techniques[i][2].iloc[:, 2], cmap='viridis')
         axes[i, 2].set_title(f"Sammon Mapping - {dataset_name}")
 
-        # Set titles
         axes[i, 0].set_title(f"PCA - {dataset_name}")
         axes[i, 1].set_title(f"t-SNE - {dataset_name}")
         axes[i, 2].set_title(f"Sammon Mapping - {dataset_name}")
 
-    # Adjust layout to avoid overlap
     plt.tight_layout()
     plt.show()
 
@@ -51,7 +49,6 @@ def plot_dimensionality_reduction(dr_values, dr_name, dataset_name, axes):
     axes.set_title(f"{dr_name} - {dataset_name}")
 
 def plot_cluster_matrix(clusters, dataset_names, drPca):
-    # Create a 3-column matrix of subplots
     fig, axes = plt.subplots(3, 3, figsize=(15, 15))
 
     for i, dataset_name in enumerate(dataset_names):
@@ -65,12 +62,9 @@ def plot_cluster_matrix(clusters, dataset_names, drPca):
         # DBSCAN Clustering
         plotClusters(drPca[i].values, clusters[i][2], axes[i, 2])
 
-        # Set titles
         axes[i, 0].set_title(f"KMeans - {dataset_name}")
         axes[i, 1].set_title(f"Agglomerative - {dataset_name}")
         axes[i, 2].set_title(f"DBSCAN - {dataset_name}")
-
-    # Adjust layout to avoid overlap
     plt.tight_layout()
     plt.show()
 
@@ -114,28 +108,21 @@ def class_preservation(data, axes):
 
 
 def cluster_preservation(data, cluster_labels, axes, k=50):
-    # Converti i dati in un array numpy per il modello NearestNeighbors
-    data_array = np.array(data.iloc[:, :2].values)  # Usa solo le prime due colonne per le coordinate 2D
-
-    # Inizializza NearestNeighbors con il numero desiderato di vicini
+    data_array = np.array(data.iloc[:, :2].values)
     nn_model = NearestNeighbors(n_neighbors=k)
     nn_model.fit(data_array)
     distances, indices = nn_model.kneighbors(data_array)
 
-    # Calcola la preservation score per ciascun punto
     preservation_scores = []
     for i, neighbors in enumerate(indices):
-        # Trova l'etichetta del cluster per il punto corrente
         cluster_i = cluster_labels.iloc[i, 0]
-        # Conta quanti dei k vicini appartengono allo stesso cluster
         same_cluster_count = sum(cluster_labels.iloc[neighbor, 0] == cluster_i for neighbor in neighbors[1:])
         preservation_score = same_cluster_count / k
         preservation_scores.append(preservation_score)
 
-    # Visualizza la preservation score su ogni punto con una mappa di colori quantitativa
     cmap = plt.get_cmap('hot')
     sc = axes.scatter(data.iloc[:, 0], data.iloc[:, 1], c=preservation_scores, cmap=cmap, edgecolor='k')
-    plt.colorbar(sc, ax=axes)  # Aggiungi una barra colore per mostrare la scala delle preservation scores
+    plt.colorbar(sc, ax=axes)
 
     axes.set_xlabel('X')
     axes.set_ylabel('Y')
@@ -173,13 +160,13 @@ if __name__ == '__main__':
         labels = None
         d = d.data
         for col in d.columns:
-            if d[col].dtype == object:  # Controlla se la colonna è di tipo stringa
+            if d[col].dtype == object:
                 try:
                     d[col].astype(float)
                 except ValueError:
                     labels_col = col
                     break
-            elif d[col].dtype == 'int':  # Controlla se la colonna è di tipo intero
+            elif d[col].dtype == 'int':
                     labels_col = col
 
         data_original = selected_data.data.drop(selected_data.data.columns[labels_col], axis=1)
