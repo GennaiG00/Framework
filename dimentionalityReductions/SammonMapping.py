@@ -1,7 +1,6 @@
 import csv
 import numpy as np
-import matplotlib.pyplot as plt
-from tqdm import tqdm  # Importa tqdm per la barra di caricamento
+from tqdm import tqdm
 
 def readFromFile(fileName):
     with open(fileName, mode='r') as infile:
@@ -59,7 +58,7 @@ def hessian(y, p, q, originalD, updateD, c):
             accum += a * (b - e * d)
     return (-2 / c) * accum
 
-def sammonMapping(data, dimension=2, iter=20, mf=0.3, initialization="random"):
+def sammonMapping( data, dimension=2, iter=20, mf=0.3, initialization="random"):
     rnd = np.random.default_rng()
     if initialization == "random":
         y = rnd.random((len(data), dimension))
@@ -71,7 +70,6 @@ def sammonMapping(data, dimension=2, iter=20, mf=0.3, initialization="random"):
         y = np.dot(data, principalComponents)
     c = np.sum(1 / (data[data != 0]))
 
-    # Calcola le distanze originali tra i punti
     originalD = np.zeros((data.shape[0], data.shape[0]))
     for i in tqdm(range(data.shape[0]), desc="Calcolo distanze originali"):
         for j in range(i + 1, data.shape[0]):
@@ -79,11 +77,10 @@ def sammonMapping(data, dimension=2, iter=20, mf=0.3, initialization="random"):
             originalD[i][j] = dist
             originalD[j][i] = dist
 
-    # Iterazioni principali di Sammon Mapping con barra di caricamento
     E = []
     for itr in tqdm(range(iter), desc="Esecuzione Sammon Mapping"):
         yNew, e = startSammonMapping(originalD, y, c, mf=mf)
         E.append(e)
         y = np.copy(yNew)
-
     return y, E
+
