@@ -71,7 +71,6 @@ class Dataset:
         else:
             raise ValueError("Unsupported data format")
 
-    # New method to print the head of the datasets
     def print_head(self, n=5):
         if isinstance(self.data, pd.DataFrame):
             print(self.data.head(n))
@@ -83,27 +82,16 @@ class Dataset:
             raise ValueError("Unsupported data format for printing head")
 
     def replace_missing_values(self, replacement=1):
-        """
-        Replaces all occurrences of '?' in the datasets with the provided replacement value (np.nan).
-        Then drops rows with any missing values.
-        """
-        # Replace '?' with np.nan
         self.data = self.data.replace('?', replacement)
 
         return self
 
     def select_columns(self, columns):
-        """
-        Select specific columns from the datasets.
-        """
         if not all(col in self.data.columns for col in columns):
             raise ValueError("One or more specified columns do not exist in the datasets.")
         return self.data[columns]
 
     def encode_columns(self, df):
-        """
-        Encode categorical columns in the dataframe.
-        """
         df = df.copy()  # Create a copy of the DataFrame
         le = LabelEncoder()
         for column in df.select_dtypes(include=['object']).columns:
