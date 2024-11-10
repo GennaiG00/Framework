@@ -1,4 +1,3 @@
-import pandas as pd
 from sklearn.metrics import silhouette_score
 from sklearn.metrics import jaccard_score
 from sklearn.neighbors import NearestNeighbors
