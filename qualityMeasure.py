@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 
 def measureClusteringTecnique(dataOne, dataTwo, labels):
+    silhouette = qmc.silhouette(dataOne, dataTwo)
     dataOne = dataOne.values
     dataTwo = dataTwo.values
     labels = labels.values
@@ -13,7 +14,6 @@ def measureClusteringTecnique(dataOne, dataTwo, labels):
         labels = label_encoder.fit_transform(labels)
 
     jaccard = qmc.jaccard_similarity(labels, dataTwo)
-    silhouette = qmc.silhouette(dataOne, dataTwo)
     return silhouette, jaccard
 
 def measureDimensionalityReduction(nameDr, *hyperparameters):

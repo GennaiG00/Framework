@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import plotFile
 import datasetOperations
@@ -9,7 +10,7 @@ import qualityMeasure
 import sys
 
 def frameworkRun():
-    while True:  # Infinite loop to allow the user to repeat operations
+    while True:
         print("Choose the operation you want to perform...")
         print("1. Clustering and/or dimensionality reduction operations")
         print("2. Network analysis")
@@ -18,10 +19,34 @@ def frameworkRun():
 
         if response == '1':
             print("Clustering and/or dimensionality reduction operations")
-            datasetPath = input("Enter the dataset name including the extension: ").strip()
-            d = datasetOperations.Dataset("./datasets/" + datasetPath)
-            print("Dataset loaded successfully.")
-            technique = input("Do you want to apply a clustering technique (1) or a dimensionality reduction technique (2)? ").strip().lower()
+
+            while True:
+                dataset_files = [f for f in os.listdir('./datasets/') if
+                                 os.path.isfile(os.path.join('./datasets/', f)) and not f.startswith(
+                                     '.') and not f.endswith('.edges')]  # Esclude i file edgelist
+
+                if dataset_files:
+                    print("Available datasets:")
+                    for i, file in enumerate(dataset_files, 1):
+                        print(f"{i}. {file}")
+
+                    choice = input(
+                        f"Enter the number corresponding to the dataset you want to use (1-{len(dataset_files)}): ").strip()
+
+                    try:
+                        chosen_file = dataset_files[int(choice) - 1]
+                        datasetPath = os.path.join('./datasets/', chosen_file)
+                        print(f"Dataset '{chosen_file}' loaded successfully.")
+                        d = datasetOperations.Dataset(datasetPath)
+                        break
+                    except (ValueError, IndexError):
+                        print("Invalid choice, please try again.")
+                else:
+                    print("No datasets found in the 'datasets' folder.")
+                    break
+
+            technique = input(
+                "Do you want to apply a clustering technique (1) or a dimensionality reduction technique (2)? ").strip().lower()
 
             if technique == "1":
                 print("Choose the clustering technique you want to apply:")
@@ -49,14 +74,14 @@ def frameworkRun():
                     nCluster = int(input("Enter the number of clusters: ").strip().lower())
                     clusterTechnique = clustering.ClusteringAlgorithm(data_original.values, "euclidean", "kmeans", nCluster)
                     tmp = clusterTechnique.fit()
-                    value = pd.DataFrame(tmp.labels_)
+                    value = pd.DataFrame(tmp.labels_, columns=['labels'])
                     print("KMeans clustering applied successfully.")
                     print(value)
                 elif response == '2':
                     nCluster = int(input("Enter the number of clusters: ").strip().lower())
                     clusterTechnique = clustering.ClusteringAlgorithm(data_original.values, "euclidean","agglomerative", nCluster)
                     tmp = clusterTechnique.fit()
-                    value = pd.DataFrame(tmp.labels_)
+                    value = pd.DataFrame(tmp.labels_, columns=['labels'])
                     print("Agglomerative clustering applied successfully.")
                     print(value)
                 elif response == '3':
@@ -64,15 +89,17 @@ def frameworkRun():
                     minPts = int(input("Enter the value of minPts (minimum number of points to be considered part of the cluster): ").strip().lower())
                     clusterTechnique = clustering.ClusteringAlgorithm(data_original.values, "euclidean", "dbscan", e, minPts)
                     tmpData, tmpLabels = clusterTechnique.fit()
-                    value = pd.DataFrame(tmpLabels)
+                    value = pd.DataFrame(tmpLabels.values, columns=['labels'])
+                    value['labels'] = value['labels'].replace('noise', -1).astype(int)
                     print("DBSCAN clustering applied successfully.")
-                    print(value)
 
                 clusteringValidation = input("If you want to perform Clustering Evaluation press 1, otherwise 2: ").strip().lower()
                 if clusteringValidation == '1':
                     silhouetteScore, jaccard = qualityMeasure.measureClusteringTecnique(data_original, value, labels_original)
                     print("Silhouette Score: ", silhouetteScore)
                     print("Jaccard Similarity: ", jaccard)
+                else:
+                    print("Clustering Evaluation not performed.")
                 plot = input("If you want to plot the 2D graph press 1, otherwise 2: ").strip().lower()
 
                 if plot == '1':
@@ -90,8 +117,8 @@ def frameworkRun():
                         print("Dimensionality reduction with t-SNE applied successfully.")
                         print(drResult)
                     elif rdTechnique == '3':
-                        nRepetition = int(input("Enter the final dimension you want to obtain: ").strip())
-                        alpha = int(input("Enter the value of alpha: ").strip())
+                        nRepetition = int(input("Enter number of repetitions: ").strip())
+                        alpha = float(input("Enter the value of alpha: ").strip())
                         drResult, e = dimensionalityReduction(2, nRepetition, alpha, "random").reduce(data_original, "sammonMapping")
                         print("Dimensionality reduction with Sammon Mapping applied successfully.")
                         print(drResult)
@@ -105,6 +132,8 @@ def frameworkRun():
                 clusteringEvaluetion = input("If you want to perform Clustering Evaluation press 1, otherwise 2: ").strip().lower()
 
                 if clusteringEvaluetion == '1':
+                    drResult = dimensionalityReduction(2).reduce(data_original, "PCA")
+                    print(drResult)
                     qualityMeasure.clusteringPreservation(drResult, value)
                 else:
                     print("Clustering Evaluation not performed.")
@@ -178,15 +207,38 @@ def frameworkRun():
                 continue
         elif response == '2':
             print("Network analysis")
-            datasetPath = input("Enter the name of the file to load the network: ").strip()
-            G = datasetOperations.Dataset('./datasets/' + datasetPath).returnNetwork()
-            print("Network loaded successfully.")
+
+            while True:
+                network_files = [f for f in os.listdir('./datasets/') if
+                                 os.path.isfile(os.path.join('./datasets/', f)) and not f.startswith('.')]
+
+                if network_files:
+                    print("Available network files:")
+                    for i, file in enumerate(network_files, 1):
+                        print(f"{i}. {file}")
+
+                    choice = input(
+                        f"Enter the number corresponding to the network file you want to use (1-{len(network_files)}): ").strip()
+
+                    try:
+                        chosen_file = network_files[int(choice) - 1]
+                        datasetPath = os.path.join('./datasets/', chosen_file)
+                        print(f"Network file '{chosen_file}' loaded successfully.")
+                        G = datasetOperations.Dataset(datasetPath).returnNetwork()
+                        break
+                    except (ValueError, IndexError):
+                        print("Invalid choice, please try again.")
+                else:
+                    print("No network files found in the 'datasets' folder.")
+                    break
+
             network = netoworkWithNx(G)
             plot = input("If you want to plot the 2D graph press 1, otherwise 2: ").strip().lower()
             if plot == '1':
                 network.plotGraph()
             print("1. PageRank and Betweenness Centrality in the network.")
             print("2. Community Detection.")
+            print("3. Operation on graph.")
             analysis = input("Choose the analysis you want to perform: ").strip().lower()
             if analysis == '1':
                 alpha = float(input("Enter the damping factor for PageRank: "))
@@ -217,6 +269,26 @@ def frameworkRun():
                         level_communities = next(communitiesGenerator)
                         communities = [list(c) for c in level_communities]
                         plotFile.print_communities_GN(G, communities)
+            elif analysis == '3':
+                print("1. Add a new node")
+                print("2. Add a new edge")
+                op = input("Choose the operation you want to perform: ").strip().lower()
+                if op == '1':
+                    node = input("Enter the node you want to add: ")
+                    network.addNode(node)
+                    print("Node added successfully.")
+                    if (input("Press 1 to print all nodes.") == '1'):
+                        print(network.getNodes())
+                    else:
+                        print("Graph not printed.")
+                elif op == '2':
+                    edge = input("Enter the edge you want to add (e.g. 'node1 node2'): ").split()
+                    network.addEdge(edge[0], edge[1])
+                    print("Edge added successfully.")
+                    if (input("Press 1 to print all edges.") == '1'):
+                        print(network.getEdges())
+                    else:
+                        print("Graph not printed.")
 
         continueResponse = input("Do you want to perform another operation? (y = yes, n = no): ").strip().lower()
         if continueResponse == 'n':

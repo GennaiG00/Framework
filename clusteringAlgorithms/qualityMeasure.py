@@ -1,13 +1,21 @@
+import pandas as pd
 from sklearn.metrics import silhouette_score
 from sklearn.metrics import jaccard_score
 from sklearn.neighbors import NearestNeighbors
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.preprocessing import LabelEncoder
+
 
 def silhouette(data, labels):
+    if sum(labels['labels'])/len(labels['labels']) == -1:
+        return 0
     return silhouette_score(data, labels)
 
 def jaccard_similarity(set1, set2, average='macro'):
+    label_encoder = LabelEncoder()
+    if isinstance(set2[1][0], str):
+        set2 = label_encoder.fit_transform(set2)
     return jaccard_score(set1, set2, average=average)
 
 
