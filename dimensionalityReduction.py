@@ -2,7 +2,7 @@ from sklearn.preprocessing import normalize
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import pandas as pd
-import dimentionalityReductions.SammonMapping as sm
+import DimentionalityReductions.SammonMapping as sm
 
 class dimensionalityReduction:
     def __init__(self, n_components=2, *hyperparameters):

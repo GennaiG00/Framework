@@ -58,7 +58,7 @@ def hessian(y, p, q, originalD, updateD, c):
             accum += a * (b - e * d)
     return (-2 / c) * accum
 
-def sammonMapping( data, dimension=2, iter=20, mf=0.3, initialization="random"):
+def sammonMapping( data, dimension=2, iter=20, mf=0.85, initialization="random"):
     rnd = np.random.default_rng()
     if initialization == "random":
         y = rnd.random((len(data), dimension))
@@ -71,16 +71,15 @@ def sammonMapping( data, dimension=2, iter=20, mf=0.3, initialization="random"):
     c = np.sum(1 / (data[data != 0]))
 
     originalD = np.zeros((data.shape[0], data.shape[0]))
-    for i in tqdm(range(data.shape[0]), desc="Calcolo distanze originali"):
+    for i in tqdm(range(data.shape[0]), desc="Distance calculating"):
         for j in range(i + 1, data.shape[0]):
             dist = euclideanDistance(data[i], data[j])
             originalD[i][j] = dist
             originalD[j][i] = dist
 
     E = []
-    for itr in tqdm(range(iter), desc="Esecuzione Sammon Mapping"):
+    for itr in tqdm(range(iter), desc="Execution of Sammon Mapping"):
         yNew, e = startSammonMapping(originalD, y, c, mf=mf)
         E.append(e)
         y = np.copy(yNew)
     return y, E
-

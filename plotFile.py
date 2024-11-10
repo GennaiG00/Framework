@@ -32,7 +32,7 @@ def plot_communities(G):
     pos = nx.spring_layout(G)
     plt.figure(figsize=(10, 7))
     nx.draw(G, pos, node_color=node_colors, node_size=500, cmap=plt.cm.jet)
-    plt.title("Grafo con le comunità rilevate")
+    plt.title("Graph with detected communities")
     plt.show()
 
 def print_communities(G):
@@ -53,7 +53,7 @@ def print_communities_GN(G, communities):
     for node in G:
         for i, community in enumerate(communities):
             if node in community:
-                color_map.append(i)  # Assegna un colore alla comunità
+                color_map.append(i)
 
     nx.draw(G, node_color=color_map, with_labels=False, cmap=plt.cm.tab10)
     plt.show()

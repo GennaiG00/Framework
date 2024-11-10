@@ -1,5 +1,5 @@
 from networkx.algorithms.community import girvan_newman
-from Network import FastNewman
+from Network.FastNewman import *
 class CommunityDetection:
     def __init__(self, detection_algorithm):
         self.detection_algorithm = None
@@ -10,7 +10,7 @@ class CommunityDetection:
 
     def detection(self, network, nCommunities=2):
         if self.detection_algorithm == "fastNewman":
-            return FastNewman.fastNewmanAlgorithm(network, nCommunities=nCommunities)
+            return fastNewmanAlgorithm(network, nCommunities=nCommunities)
         elif self.detection_algorithm == "girvanNewman":
             return girvan_newman(network)
 

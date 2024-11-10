@@ -75,7 +75,6 @@ class Dataset:
         if isinstance(self.data, pd.DataFrame):
             print(self.data.head(n))
         elif isinstance(self.data, list):
-            # For list data, print the first `n` rows
             for row in self.data[:n]:
                 print(row)
         else:
@@ -92,7 +91,7 @@ class Dataset:
         return self.data[columns]
 
     def encode_columns(self, df):
-        df = df.copy()  # Create a copy of the DataFrame
+        df = df.copy()
         le = LabelEncoder()
         for column in df.select_dtypes(include=['object']).columns:
             df[column] = le.fit_transform(df[column])

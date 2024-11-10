@@ -1,39 +1,36 @@
-from re import error
 import pandas as pd
 import plotFile
-import numpy as np
 import datasetOperations
 import clustering
-import qualityMeasure
 from Network.comunityDetection import CommunityDetection
-from Network.networkWithNx import netoworkWithNx
+from Network.Network import netoworkWithNx
 from dimensionalityReduction import dimensionalityReduction
+import qualityMeasure
 import sys
 
 def frameworkRun():
-    while True:  # Ciclo infinito per consentire all'utente di ripetere le operazioni
-        print("Scegli l'operazione che vuoi svolgere...")
-        print("1. Per fare operazioni di clustering e/o riduzione della dimensionalità")
-        print("2. Analisi della rete")
+    while True:  # Infinite loop to allow the user to repeat operations
+        print("Choose the operation you want to perform...")
+        print("1. Clustering and/or dimensionality reduction operations")
+        print("2. Network analysis")
 
-        risposta = input("Inserisci il numero dell'operazione che vuoi svolgere: ").strip()
+        response = input("Enter the number of the operation you want to perform: ").strip()
 
-        if risposta == '1':
-            print("Operazioni di clustering e/o riduzione della dimensionalità")
-            datasetPath = input("Inserisci il nome del dataset compreso di estensione: ").strip()
+        if response == '1':
+            print("Clustering and/or dimensionality reduction operations")
+            datasetPath = input("Enter the dataset name including the extension: ").strip()
             d = datasetOperations.Dataset("./datasets/" + datasetPath)
-            print("Dataset caricato con successo.")
-            tecnica = input("Vuoi applicare una tecnica di clusterizzazione (1) o una tecnica di riduzione della dimensionalità (2)? ").strip().lower()
+            print("Dataset loaded successfully.")
+            technique = input("Do you want to apply a clustering technique (1) or a dimensionality reduction technique (2)? ").strip().lower()
 
-            if tecnica == "1":
-                print("Scegli la tecnica di clusterizzazione che vuoi applicare:")
+            if technique == "1":
+                print("Choose the clustering technique you want to apply:")
                 print("1. KMeans")
                 print("2. Agglomerative")
                 print("3. DBSCAN")
-                risposta = input("Inserisci il numero della tecnica di clusterizzazione che vuoi applicare: ").strip()
+                response = input("Enter the number of the clustering technique you want to apply: ").strip()
 
                 selected_data = d.replace_missing_values("?")
-                labels = None
                 d = d.data
 
                 for col in d.columns:
@@ -48,175 +45,189 @@ def frameworkRun():
                 labels_original = selected_data.data[labels_col]
                 data_original = selected_data.data.drop(selected_data.data.columns[labels_col], axis=1)
 
-                if risposta == '1':
-                    nCluster = int(input("Inserisci il numero di cluster. ").strip().lower())
+                if response == '1':
+                    nCluster = int(input("Enter the number of clusters: ").strip().lower())
                     clusterTechnique = clustering.ClusteringAlgorithm(data_original.values, "euclidean", "kmeans", nCluster)
                     tmp = clusterTechnique.fit()
                     value = pd.DataFrame(tmp.labels_)
-                    print("Clusterizzazione con KMeans applicata con successo.")
+                    print("KMeans clustering applied successfully.")
                     print(value)
-                elif risposta == '2':
-                    nCluster = int(input("Inserisci il numero di cluster.").strip().lower())
+                elif response == '2':
+                    nCluster = int(input("Enter the number of clusters: ").strip().lower())
                     clusterTechnique = clustering.ClusteringAlgorithm(data_original.values, "euclidean","agglomerative", nCluster)
                     tmp = clusterTechnique.fit()
                     value = pd.DataFrame(tmp.labels_)
-                    print("Clusterizzazione con Agglomerative applicata con successo.")
+                    print("Agglomerative clustering applied successfully.")
                     print(value)
-                elif risposta == '3':
-                    e = float(input("Inserisci il valore di e(raggio dal punto p per calcolare i vicini). ").strip().lower())
-                    minPts = int(input("Inserisci il valore di minPts(il numero minimo di punti per essere considerato elemento del cluster). ").strip().lower())
+                elif response == '3':
+                    e = float(input("Enter the value of e (radius from point p to calculate neighbors): ").strip().lower())
+                    minPts = int(input("Enter the value of minPts (minimum number of points to be considered part of the cluster): ").strip().lower())
                     clusterTechnique = clustering.ClusteringAlgorithm(data_original.values, "euclidean", "dbscan", e, minPts)
                     tmpData, tmpLabels = clusterTechnique.fit()
                     value = pd.DataFrame(tmpLabels)
-                    print("Clusterizzazione con DBSCAN applicata con successo.")
+                    print("DBSCAN clustering applied successfully.")
                     print(value)
 
-                clusteringValidation = input("Se vuoi effettuare la Clustering Evaluation premi 1 altrimenti 2: ").strip().lower()
+                clusteringValidation = input("If you want to perform Clustering Evaluation press 1, otherwise 2: ").strip().lower()
                 if clusteringValidation == '1':
                     silhouetteScore, jaccard = qualityMeasure.measureClusteringTecnique(data_original, value, labels_original)
                     print("Silhouette Score: ", silhouetteScore)
                     print("Jaccard Similarity: ", jaccard)
-                plot = input("Se vuoi stampare il grafico in 2D premi 1 altrimenti 2? ").strip().lower()
+                plot = input("If you want to plot the 2D graph press 1, otherwise 2: ").strip().lower()
 
                 if plot == '1':
-                    print("Scegli la tecnica di riduzione della dimensionalità che vuoi applicare:")
+                    print("Choose the dimensionality reduction technique you want to apply:")
                     print("1. PCA")
                     print("2. t-SNE")
                     print("3. Sammon Mapping")
-                    rdTechnique = input("Inserisci il numero della tecnica di riduzione che vuoi applicare: ").strip()
-                    finalDimension = int(input("Inserisci la dimensione finale che vuoi ottenere: ").strip())
+                    rdTechnique = input("Enter the number of the reduction technique you want to apply: ").strip()
                     if rdTechnique == '1':
-                        drResult = dimensionalityReduction(finalDimension).reduce(data_original, "PCA")
-                        print("Riduzione della dimensionalità con PCA applicata con successo.")
+                        drResult = dimensionalityReduction(2).reduce(data_original, "PCA")
+                        print("Dimensionality reduction with PCA applied successfully.")
                         print(drResult)
                     elif rdTechnique == '2':
-                        drResult = dimensionalityReduction(finalDimension).reduce(data_original, "t-SNE")
-                        print("Riduzione della dimensionalità con t-SNE applicata con successo.")
+                        drResult = dimensionalityReduction(2).reduce(data_original, "t-SNE")
+                        print("Dimensionality reduction with t-SNE applied successfully.")
                         print(drResult)
                     elif rdTechnique == '3':
-                        nRepetition = int(input("Inserisci la dimensione finale che vuoi ottenere: ").strip())
-                        alpha = int(input("Inserisci il valore di alpha: ").strip())
-                        drResult, e = dimensionalityReduction(finalDimension, nRepetition, alpha, "random").reduce(data_original,
-                                                                                               "sammonMapping")
-                        print("Riduzione della dimensionalità con Sammon Mapping applicata con successo.")
+                        nRepetition = int(input("Enter the final dimension you want to obtain: ").strip())
+                        alpha = int(input("Enter the value of alpha: ").strip())
+                        drResult, e = dimensionalityReduction(2, nRepetition, alpha, "random").reduce(data_original, "sammonMapping")
+                        print("Dimensionality reduction with Sammon Mapping applied successfully.")
                         print(drResult)
-                        print("Errore: ", e)
+                        print("Error: ", e)
 
-                    print("Stampa grafico in 2D...")
+                    print("Printing 2D graph...")
                     plotFile.plot2D(drResult, value)
-                elif plot == '2':
-                    continue
                 else:
-                    print("Opzione non valida. Riprova.")
+                    print("Graph not printed.")
+
+                clusteringEvaluetion = input("If you want to perform Clustering Evaluation press 1, otherwise 2: ").strip().lower()
+
+                if clusteringEvaluetion == '1':
+                    qualityMeasure.clusteringPreservation(drResult, value)
+                else:
+                    print("Clustering Evaluation not performed.")
 
 
-            elif tecnica == "2":
-                print("Scegli la tecnica di riduzione della dimensionalità che vuoi applicare:")
+
+            elif technique == "2":
+                print("Choose the dimensionality reduction technique you want to apply:")
                 print("1. PCA")
                 print("2. t-SNE")
                 print("3. Sammon Mapping")
-                rdTechnique = input("Inserisci il numero della tecnica di riduzione che vuoi applicare: ").strip()
+                rdTechnique = input("Enter the number of the reduction technique you want to apply: ").strip()
 
                 selected_data = d.replace_missing_values("?")
                 d = d.data
 
                 for col in d.columns:
-                    if d[col].dtype == object:  # Controlla se la colonna è di tipo stringa
+                    if d[col].dtype == object:  # Check if the column is of string type
                         try:
                             d[col].astype(float)
                         except ValueError:
                             labels_col = col
                             break
-                    elif d[col].dtype == 'int':  # Controlla se la colonna è di tipo intero
+                    elif d[col].dtype == 'int':  # Check if the column is of integer type
                         labels_col = col
                 data_original = selected_data.data.drop(selected_data.data.columns[labels_col], axis=1)
 
-                finalDimension = int(input("Inserisci la dimensione finale che vuoi ottenere: ").strip())
+                finalDimension = int(input("Enter the final dimension you want to achieve: ").strip())
                 if rdTechnique == '1':
                     drResult = dimensionalityReduction(finalDimension).reduce(data_original, "PCA")
-                    print("Riduzione della dimensionalità con PCA applicata con successo.")
+                    print("Dimensionality reduction with PCA applied successfully.")
                     print(drResult)
                 elif rdTechnique == '2':
                     drResult = dimensionalityReduction(finalDimension).reduce(data_original, "t-SNE")
-                    print("Riduzione della dimensionalità con t-SNE applicata con successo.")
+                    print("Dimensionality reduction with t-SNE applied successfully.")
                     print(drResult)
                 elif rdTechnique == '3':
-                    nRepetition = int(input("Inserisci la dimensione finale che vuoi ottenere: ").strip())
-                    alpha = int(input("Inserisci il valore di alpha: ").strip())
-                    drResult, e = dimensionalityReduction(finalDimension, nRepetition, alpha, "random").reduce(
-                        data_original,
-                        "sammonMapping")
-                    print("Riduzione della dimensionalità con Sammon Mapping applicata con successo.")
+                    alpha = float(input("Enter the scaling parameter: ").strip())
+                    itr = int(input("Enter the number of iterations: ").strip())
+                    drResult, e = dimensionalityReduction(finalDimension, itr, alpha, "random").reduce(data_original, "sammonMapping")
+                    print("Dimensionality reduction with Sammon Mapping applied successfully.")
                     print(drResult)
-                    print("Errore: ", e)
+                    print("Error: ", e)
 
-                plot = input("Se vuoi stampare il grafico in 2D premi 1 altrimenti 2? ").strip().lower()
+                plot = input("If you want to plot the 2D graph press 1, otherwise 2: ").strip().lower()
                 if plot == '1':
-                    print("Stampa grafico in 2D...")
+                    print("Printing 2D graph...")
                     plotFile.plot2D(drResult, d[labels_col])
-                elif plot == '2':
-                    continue
-                else:
-                    print("Opzione non valida. Riprova.")
-                    continue
+
+                qualityM = input("If you want to perform Quality Measure press 1, otherwise 2: ").strip().lower()
+                if qualityM == '1':
+                    if rdTechnique == '1':
+                        tot, ex = qualityMeasure.measureDimensionalityReduction(rdTechnique, data_original, drResult)
+                        print("Variance per component: ", ex['P1'], ex['P2'])
+                        print("Total explained variance: ", tot)
+                    elif rdTechnique == '2':
+                        corr = qualityMeasure.measureDimensionalityReduction(rdTechnique, data_original, drResult)
+                        print("Correlation between original distances and reduced distances: ", corr)
+                    elif rdTechnique == '3':
+                        stress = qualityMeasure.measureDimensionalityReduction(rdTechnique, data_original, drResult)
+                        print("Sammon Stress: ", stress)
+
+
+                classValidation = input("If you want to perform Class Evaluation press 1, otherwise 2: ").strip().lower()
+                if classValidation == '1':
+                    data = drResult
+                    data['labels'] = d[labels_col]
+                    qualityMeasure.classPreservation(data)
             else:
-                print("Opzione non valida. Riprova.")
+                print("Invalid option. Please try again.")
                 continue
-        elif risposta == '2':
-            print("Analisi della rete")
-            datasetPath = input("Inserisci il nome del file per caricare la rete: ").strip()
+        elif response == '2':
+            print("Network analysis")
+            datasetPath = input("Enter the name of the file to load the network: ").strip()
             G = datasetOperations.Dataset('./datasets/' + datasetPath).returnNetwork()
-            print("Rete caricata con successo.")
+            print("Network loaded successfully.")
             network = netoworkWithNx(G)
-            plot = input("Se vuoi stampare il grafico in 2D premi 1 altrimenti 2? ").strip().lower()
+            plot = input("If you want to plot the 2D graph press 1, otherwise 2: ").strip().lower()
             if plot == '1':
                 network.plotGraph()
-            print("1. PageRank e Betweenness Centrality nella rete.")
+            print("1. PageRank and Betweenness Centrality in the network.")
             print("2. Community Detection.")
-            analysis = input("Scegli l'analisi che vuoi fare: ").strip().lower()
+            analysis = input("Choose the analysis you want to perform: ").strip().lower()
             if analysis == '1':
-                alpha = float(input("Inserisci il damping factor per il PageRank: "))
+                alpha = float(input("Enter the damping factor for PageRank: "))
                 pagerank = network.computePageRank(alpha)
                 print("PageRank: ", pagerank)
                 edgeBetweenness = network.edgeBetweeness()
                 for edge, centrality in edgeBetweenness.items():
-                    print(f"Arco {edge}: {centrality}")
+                    print(f"Edge {edge}: {centrality}")
             elif analysis == '2':
                 print("1. Fast Newman.")
                 print("2. Girvan Newman.")
-                communitiesDetectionTechnique = input("Scegli la tecnica di community detection che vuoi applicare:")
+                communitiesDetectionTechnique = input("Choose the community detection technique you want to apply:")
                 if communitiesDetectionTechnique == '1':
-                    nCom = int(input("Inserisci il numero di comunità: ").strip().lower())
+                    nCom = int(input("Enter the number of communities: ").strip().lower())
                     detection = CommunityDetection("fastNewman")
                     quality = detection.detection(network.graph, nCom)
-                    print("Qualità delle partizioni: ", quality)
-                    print("Comunità rilevate: ")
+                    print("Quality of partitions: ", quality)
+                    print("Detected communities: ")
                     plotFile.print_communities(G)
                     plotFile.plot_communities(G)
                 elif communitiesDetectionTechnique == '2':
                     detection = CommunityDetection("girvanNewman")
                     communitiesGenerator = detection.detection(network.graph)
-                    kCom = int(input(f"Indica quante comunità vuoi visualizzare <= {len(network.getNodes())}: "))
+                    kCom = int(input(f"Indicate how many communities you want to visualize <= {len(network.getNodes())}: "))
                     if(kCom > len(network.getNodes())):
-                        raise Exception("Numero delle comunità maggiore dei nodi nella rete!")
+                        raise Exception("Number of communities exceeds the nodes in the network!")
                     for k in range(0, kCom):
                         level_communities = next(communitiesGenerator)
                         communities = [list(c) for c in level_communities]
                         plotFile.print_communities_GN(G, communities)
 
-        risposta_continuare = input("Vuoi fare un'altra operazione? (s = sì, n = no): ").strip().lower()
-        if risposta_continuare == 'n':
-            print("Uscita dal programma.")
+        continueResponse = input("Do you want to perform another operation? (y = yes, n = no): ").strip().lower()
+        if continueResponse == 'n':
+            print("Exiting the program.")
             sys.exit(0)
-        elif risposta_continuare == 's':
+        elif continueResponse == 'y':
             continue
         else:
-            print("Opzione non valida. Riprova.")
+            print("Invalid option. Please try again.")
 
 
 if __name__ == '__main__':
 
     frameworkRun()
-
-
-
