@@ -3,14 +3,13 @@ import dimentionalityReductions.qualityMeasure as qmdr
 from sklearn.metrics import pairwise_distances
 import numpy as np
 
-def measureClusteringTecnique(nameCt, data):
-    if nameCt == 'clustering':
-        processed_labels = np.where(data == 'noise', -1, data)
-        data = processed_labels.astype(int)
-        labels = data[:, 2]
-        silhouette = qmc.evaluate_clustering(data, labels)
-        dbi = qmc.evaluate_clustering_dbi(data, labels)
-        return silhouette, dbi
+def measureClusteringTecnique(dataOne, dataTwo, labels):
+    dataOne = np.array(dataOne)
+    dataTwo = np.array(dataTwo)
+    labels = np.array(labels)
+    silhouette = qmc.silhouette(dataOne, dataTwo)
+    jaccard = qmc.jaccard_similarity(labels, dataTwo)
+    return silhouette, jaccard
 
 def measureDimensionalityReduction(nameDr, *hyperparameters):
     if nameDr == 'pca':

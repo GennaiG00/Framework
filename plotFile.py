@@ -1,37 +1,61 @@
 import matplotlib.pyplot as plt
 import numpy as np
-def plotClusters(points):
-    # Estrai x, y e i label dai risultati
-    x = points[:, 0]  # Prima colonna per le x
-    y = points[:, 1]  # Seconda colonna per le y
-    labels = points[:, 2]  # Terza colonna per i label
+import pandas as pd
+import networkx as nx
 
-    # Determina i cluster unici (label)
-    unique_labels = np.unique(labels)
+def plot2D(data, labels):
+    if isinstance(labels, pd.DataFrame):
+        labels = labels.iloc[:, 0]
+    fig, ax = plt.subplots(figsize=(15, 15))
+    points = np.array(data)
+    unique_labels = set(labels)
+    colors = plt.get_cmap('tab20')(np.linspace(0, 1, len(unique_labels)))
 
-    # Crea una mappa di colori per i cluster
-    colors = plt.cm.Spectral(np.linspace(0, 1, len(unique_labels)))
-
-    plt.figure(figsize=(10, 8))
-
-    for k, col in zip(unique_labels, colors):
-        if k == -1:
-            # Rumore (punti con label -1)
-            col = [0, 0, 0, 1]  # Colore nero per il rumore
-            cluster_label = 'Noise'
+    for label, color in zip(unique_labels, colors):
+        label_points = points[np.array(labels) == label]
+        if label == -1:
+            ax.scatter(label_points[:, 0], label_points[:, 1], color='black', label='Noise', marker='x')
         else:
-            cluster_label = f'Cluster {k}'
+            ax.scatter(label_points[:, 0], label_points[:, 1], color=color, label=f'Cluster {label}')
 
-        # Maschera per filtrare i punti del cluster k
-        class_member_mask = (labels == k)
-
-        # Plotta i punti
-        xy = np.vstack((x[class_member_mask], y[class_member_mask])).T
-        plt.scatter(xy[:, 0], xy[:, 1], s=30, c=[col], label=cluster_label)
-
-    # Etichette e titolo del grafico
-    plt.title('DBSCAN Clustering')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.legend()
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.legend()
+    plt.tight_layout()
     plt.show()
+
+def plot_communities(G):
+    communities = [G.nodes[node]['communities'] for node in G.nodes()]
+    uniqueCommunities = list(set(communities))
+    color_map = {community: idx for idx, community in enumerate(uniqueCommunities)}
+    node_colors = [color_map[G.nodes[node]['communities']] for node in G.nodes()]
+    pos = nx.spring_layout(G)
+    plt.figure(figsize=(10, 7))
+    nx.draw(G, pos, node_color=node_colors, node_size=500, cmap=plt.cm.jet)
+    plt.title("Grafo con le comunità rilevate")
+    plt.show()
+
+def print_communities(G):
+    communities = [G.nodes[node]['communities'] for node in G.nodes()]
+    uniqueCommunities = list(set(communities))
+    for comm in uniqueCommunities:
+        print("(", end='')
+        for node in G.nodes():
+            if G.nodes[node]['communities'] == comm:
+                print(node, end='')
+                if node != G.nodes(-1) :
+                    print(",", end='')
+        print(")")
+
+
+def print_communities_GN(G, communities):
+    color_map = []
+    for node in G:
+        for i, community in enumerate(communities):
+            if node in community:
+                color_map.append(i)  # Assegna un colore alla comunità
+
+    nx.draw(G, node_color=color_map, with_labels=False, cmap=plt.cm.tab10)
+    plt.show()
+
+

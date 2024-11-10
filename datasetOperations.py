@@ -1,8 +1,9 @@
+import json
 import pandas as pd
 import numpy as np
 from scipy.io import arff
-import scipy.io as sio
 from sklearn.preprocessing import LabelEncoder
+import networkx as nx
 
 class Dataset:
     def __init__(self, path):
@@ -13,12 +14,12 @@ class Dataset:
             self._load_arff(path)
         elif path.endswith('.txt'):
             self._load_txt(path)
-        elif path.endswith('.mat'):
-            self._load_mat_(path)
-        elif path.endswith('.names'):
-            self._load_names(path)
+        elif path.endswith('.json'):
+            self._load_json(path)
+        elif path.endswith('.edgelist'):
+            self._load_edgelist(path)
         else:
-            raise ValueError("Unsupported file format. Please provide a .csv, .arff, or .txt file.")
+            raise ValueError("Unsupported file format! Please provide a .csv, .arff, .txt, or .json file.")
 
     def _load_csv(self, path):
         self.data = pd.read_csv(path)
@@ -33,17 +34,19 @@ class Dataset:
         except:
             raise ValueError("Error reading .txt file. Ensure the file is properly formatted.")
 
-    def _load_mat_(self, path):
-        try:
-            self.data = sio.loadmat(path)
-        except:
-            raise ValueError("Error reading .mat file. Ensure the file is properly formatted.")
+    def _load_json(self, path):
+        with open(path, 'r') as file:
+            self.data = json.load(file)
 
-    def _load_names(self, path):
-        try:
-            self.data = pd.read_csv(path, delimiter=';', encoding='utf-8')
-        except:
-            raise ValueError("Error reading .names file. Ensure the file is properly formatted.")
+    def get_nodes(self):
+        return self.data['nodes']
+
+    def get_edges(self):
+        if 'links' in self.data:
+            return self.data['links']
+        else:
+            return self.data['edges']
+
 
     def get_points(self):
         if isinstance(self.data, pd.DataFrame):
@@ -106,3 +109,9 @@ class Dataset:
         for column in df.select_dtypes(include=['object']).columns:
             df[column] = le.fit_transform(df[column])
         return df
+
+    def _load_edgelist(self, filename):
+        self.data = nx.read_edgelist(filename)
+
+    def returnNetwork(self):
+        return self.data
