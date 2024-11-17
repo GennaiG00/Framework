@@ -1,4 +1,3 @@
-import pandas as pd
 from sklearn.metrics import silhouette_score
 from sklearn.metrics import jaccard_score
 from sklearn.neighbors import NearestNeighbors
@@ -19,7 +18,7 @@ def jaccard_similarity(set1, set2, average='macro'):
     return jaccard_score(set1, set2, average=average)
 
 
-def cluster_preservation(data, cluster_labels, k=50):
+def cluster_preservation(data, cluster_labels, k=50, algorithm_name=''):
     data_array = np.array(data.iloc[:, :2].values)
     nn_model = NearestNeighbors(n_neighbors=k)
     nn_model.fit(data_array)
@@ -40,6 +39,6 @@ def cluster_preservation(data, cluster_labels, k=50):
 
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
-    ax.set_title("Cluster Preservation Score")
+    ax.set_title("Cluster Preservation Score for " + algorithm_name)
 
     plt.show()
