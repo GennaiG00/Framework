@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import pairwise_distances
 import numpy as np
 
-def class_preservation(data):
+def class_preservation(data, algorithm_name=''):
     k = 50
     max_distance = 0.2
     nn_model = NearestNeighbors(n_neighbors=k, radius=max_distance)
@@ -17,14 +17,14 @@ def class_preservation(data):
         preservation_score = same_class_count / k
         preservation_scores.append(preservation_score)
 
-    fig, ax = plt.subplots(figsize=(10, 10))
+    fig, ax = plt.subplots(figsize=(14, 10))
     cmap = plt.get_cmap('hot')
     sc = ax.scatter(data.iloc[:, 0], data.iloc[:, 1], c=preservation_scores, cmap=cmap, edgecolor='k')
     plt.colorbar(sc, ax=ax)
 
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
-    ax.set_title("Class Preservation Score")
+    ax.set_title("Class Preservation Score for " + algorithm_name)
 
     plt.show()
 
