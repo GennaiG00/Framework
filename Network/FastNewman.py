@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def fractionOfEdges(G, communities):
     total_edges = len(G.edges())
     community_labels = sorted(communities)
@@ -41,6 +42,7 @@ def fastNewmanAlgorithm(G, nCommunities=2):
         G.nodes[node]['communities'] = node
     communities = set([data['communities'] for node, data in G.nodes(data=True)])
     e, label_to_index = fractionOfEdges(G, communities)
+
     while len(communities) > nCommunities:
         n = e.shape[0]
         a = np.zeros(e.shape[0])
@@ -63,4 +65,15 @@ def fastNewmanAlgorithm(G, nCommunities=2):
 
         communities = set([data['communities'] for node, data in G.nodes(data=True)])
         e, label_to_index = fractionOfEdges(G, communities)
-    return q
+
+    # Ricostruisci le comunità finali
+    final_communities = {}
+    for node in G.nodes():
+        comm = G.nodes[node]['communities']
+        if comm not in final_communities:
+            final_communities[comm] = []
+        final_communities[comm].append(node)
+
+    # Converti in lista di liste
+    final_communities_list = list(final_communities.values())
+    return q, final_communities_list

@@ -73,3 +73,52 @@ After running the script, you will be prompted with various options. Here is an 
 ## Acknowledgments
 - Uses the `sklearn` library for clustering and dimensionality reduction.
 - Uses `NetworkX` for network analysis and visualization.
+
+
+## Pipeline Operations
+
+### Dimensionality Reduction Pipeline
+The **`dimensionality_reduction_pipeline`** function allows applying dimensionality reduction techniques to multiple datasets sequentially, supporting methods such as PCA, t-SNE, and Sammon Mapping. It also provides options to evaluate class preservation performance and visualize results.
+
+#### Key Steps:
+1. **Dataset Loading**:
+   - Datasets are loaded from the provided list, and missing values are replaced automatically.
+2. **Label Separation**:
+   - The label (target) column is automatically identified and separated from the data.
+3. **Dimensionality Reduction**:
+   - For each selected method, dimensionality reduction is applied, and the results are saved and printed.
+4. **Performance Evaluation**:
+   - If enabled, class preservation is evaluated using the `classPreservation` method.
+5. **Visualization**:
+   - Results are visualized in a 2D plot, where points are colored based on the original labels.
+
+### Community Detection Pipeline
+The **`community_detection_pipeline`** function processes multiple network files sequentially to detect communities using both Girvan-Newman and Fast Newman methods. The pipeline generates community visualizations and prints the detected communities for each method.
+
+#### Key Steps:
+1. **Network File Processing**:
+   - Each network file in the provided list is loaded and processed as a graph.
+2. **Girvan-Newman Method**:
+   - Communities are detected iteratively, and the first level of communities is extracted and visualized.
+3. **Fast Newman Method**:
+   - Communities are detected based on the specified number of clusters, and the quality of the partitions is computed and displayed.
+4. **Visualization**:
+   - Nodes are colored according to their community, and the graph is displayed for both methods.
+
+#### Example
+```python
+datasets = ['./datasets/dataset1.txt', './datasets/dataset2.txt', './datasets/dataset3.txt']
+dimensionality_reduction_pipeline(
+    datasets, 
+    ['PCA', 't-SNE', 'sammonMapping'], 
+    final_dimension=2, 
+    n_repetition=2, 
+    alpha=0.85, 
+    plot=True, 
+    perform_preservation=True
+)
+
+network_files = ['./datasets/karate.edgelist', './datasets/les_miserables.edgelist', './datasets/three_communities.edgelist']
+n_communities = [2, 5, 3]
+community_detection_pipeline(network_files, n_communities=n_communities)
+```

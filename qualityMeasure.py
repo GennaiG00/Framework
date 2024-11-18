@@ -3,6 +3,7 @@ import DimentionalityReductions.qualityMeasure as qmdr
 from sklearn.metrics import pairwise_distances
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
+import Network.quality as q
 
 def measureClusteringTecnique(dataOne, dataTwo, labels):
     silhouette = qmc.silhouette(dataOne, dataTwo)
@@ -30,9 +31,23 @@ def measureDimensionalityReduction(nameDr, *hyperparameters):
     elif nameDr == '3':
         return qmdr.evaluate_sammon_mapping(hyperparameters[0], hyperparameters[1])
 
+def trustworthinessForDimensionalityReduction(X, X_reduced, n_neighbors=20):
+    return qmdr.trustworthiness(X, X_reduced, n_neighbors)
 
-def clusteringPreservation(data, labels):
-    return qmc.cluster_preservation(data, labels)
+def continuityForDimensionalityReduction(X, X_reduced, n_neighbors=20):
+    return qmdr.continuity(X, X_reduced, n_neighbors)
 
-def classPreservation(data):
-    return qmdr.class_preservation(data)
+def clusteringPreservation(data, labels, algorithm_name):
+    return qmc.cluster_preservation(data, labels,k=50, algorithm_name=algorithm_name)
+
+def classPreservation(data, algorithm_name):
+    return qmdr.class_preservation(data, algorithm_name)
+
+def modularity(graph, communities):
+    return q.modularity(graph, communities)
+
+def internalDensity(graph, communities):
+    return q.internal_density(graph, communities)
+
+def ratioCut(graph, communities):
+    return q.ratio_cut(graph, communities)

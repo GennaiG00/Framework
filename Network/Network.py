@@ -1,7 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
-class netoworkWithNx:
+class networkWithNx:
     def __init__(self, graph):
         self.graph = graph
 
